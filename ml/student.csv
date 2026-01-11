@@ -1,0 +1,21 @@
+student_id,student_name,grade,section,institution_id,baseline_proficiency,learning_pace,preferred_learning_style
+STU001,Aarav Patel,10,A,INS_01,85,fast,visual
+STU002,Beatriz Silva,10,B,INS_01,62,average,mixed
+STU003,Charlie Davis,10,A,INS_01,45,slow,textual
+STU004,Diya Sharma,10,C,INS_02,92,fast,mixed
+STU005,Ethan Hunt,10,B,INS_01,70,average,visual
+STU006,Fatima Al-Fayed,11,A,INS_02,35,slow,visual
+STU007,Grace Hopper,11,A,INS_02,78,fast,textual
+STU008,Hiroshi Tanaka,11,B,INS_03,55,average,mixed
+STU009,Isabella Rossi,11,C,INS_03,88,fast,visual
+STU010,Jack Smith,10,A,INS_01,42,slow,mixed
+STU011,Kevin Hart,12,A,INS_04,65,average,textual
+STU012,Liam Neeson,12,B,INS_04,81,fast,mixed
+STU013,Mia Wong,12,A,INS_04,95,fast,visual
+STU014,Noah Johnson,12,C,INS_04,28,slow,textual
+STU015,Olivia Brown,10,B,INS_01,58,average,visual
+STU016,Priya Singh,10,C,INS_02,74,average,mixed
+STU017,Quentin Tarantino,11,B,INS_03,60,average,textual
+STU018,Rahul Gandhi,11,A,INS_02,48,slow,visual
+STU019,Sarah Connor,12,A,INS_04,83,fast,mixed
+STU020,Tom Holland,10,A,INS_01,67,average,visual
