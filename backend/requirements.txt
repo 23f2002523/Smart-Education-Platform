@@ -1,6 +1,8 @@
 flask
 flask-cors
-sqlite3
+flask-bcrypt
+pyjwt
 joblib
 pandas
 numpy
+python-dotenv

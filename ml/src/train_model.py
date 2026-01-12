@@ -82,7 +82,7 @@ class AMEPModelTrainer:
         
         # Feature importance
         feature_importance = pd.DataFrame({
-            'feature': feature_columns,
+            'feature': X.columns,
             'importance': model.feature_importances_
         }).sort_values('importance', ascending=False)
         
@@ -157,7 +157,7 @@ class AMEPModelTrainer:
         
         # Feature importance
         feature_importance = pd.DataFrame({
-            'feature': feature_columns,
+            'feature': X.columns,
             'importance': model.feature_importances_
         }).sort_values('importance', ascending=False)
         
@@ -228,7 +228,7 @@ class AMEPModelTrainer:
         
         # Feature importance
         feature_importance = pd.DataFrame({
-            'feature': feature_columns,
+            'feature': X.columns,
             'importance': model.feature_importances_
         }).sort_values('importance', ascending=False)
         

@@ -1,9 +1,24 @@
 -- AMEP Database Schema
 -- SQLite Database for Adaptive Mastery & Engagement Platform
 
+-- Users Table (for authentication)
+CREATE TABLE IF NOT EXISTS users (
+    user_id TEXT PRIMARY KEY,
+    email TEXT UNIQUE NOT NULL,
+    password_hash TEXT NOT NULL,
+    full_name TEXT NOT NULL,
+    role TEXT NOT NULL CHECK(role IN ('student', 'teacher', 'admin')),
+    grade TEXT,
+    subject TEXT,
+    is_active BOOLEAN DEFAULT 1,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    last_login TIMESTAMP
+);
+
 -- Students Table
 CREATE TABLE IF NOT EXISTS students (
     student_id TEXT PRIMARY KEY,
+    user_id TEXT UNIQUE,
     student_name TEXT NOT NULL,
     grade INTEGER NOT NULL,
     section TEXT NOT NULL,
@@ -11,7 +26,8 @@ CREATE TABLE IF NOT EXISTS students (
     baseline_proficiency INTEGER,
     learning_pace TEXT CHECK(learning_pace IN ('slow', 'average', 'fast')),
     preferred_learning_style TEXT CHECK(preferred_learning_style IN ('visual', 'textual', 'mixed')),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
 
 -- Quiz Attempts Table

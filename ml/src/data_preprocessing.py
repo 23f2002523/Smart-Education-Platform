@@ -20,22 +20,17 @@ class AMEPDataProcessor:
         """Load all CSV datasets"""
         print("Loading datasets...")
         
-        self.students = pd.read_csv(f'{self.data_path}student.csv')
-        self.quiz_attempts = pd.read_csv(f'{self.data_path}quizattempts_fixed.csv')
-        self.mastery_labels = pd.read_csv(f'{self.data_path}masterylabels_fixed.csv')
-        self.project_activities = pd.read_csv(f'{self.data_path}projectactivities_fixed.csv')
-        
-        # Handle engagement logs separately (might be binary)
-        try:
-            self.engagement_logs = pd.read_csv(f'{self.data_path}engagementlogs.csv')
-        except:
-            print("Warning: engagementlogs.csv could not be loaded as CSV")
-            self.engagement_logs = None
+        self.students = pd.read_csv(f'{self.data_path}students_ml.csv')
+        self.quiz_attempts = pd.read_csv(f'{self.data_path}quiz_attempts_ml.csv')
+        self.mastery_labels = pd.read_csv(f'{self.data_path}mastery_labels_ml.csv')
+        self.project_activities = pd.read_csv(f'{self.data_path}project_activities_ml.csv')
+        self.engagement_logs = pd.read_csv(f'{self.data_path}engagement_logs_ml.csv')
         
         print(f"Students: {len(self.students)} records")
         print(f"Quiz Attempts: {len(self.quiz_attempts)} records")
         print(f"Mastery Labels: {len(self.mastery_labels)} records")
         print(f"Project Activities: {len(self.project_activities)} records")
+        print(f"Engagement Logs: {len(self.engagement_logs)} records")
         
         return self
     
@@ -46,22 +41,24 @@ class AMEPDataProcessor:
         """
         print("\n=== Preparing Mastery Prediction Dataset ===")
         
-        # Merge quiz attempts with student data
-        df = self.quiz_attempts.merge(self.students, on='student_id', how='left')
+        # Merge quiz attempts with student data (if not already merged)
+        df = self.quiz_attempts.copy()
+        if 'grade' not in df.columns:
+            df = df.merge(self.students, on='student_id', how='left')
         
         # Merge with mastery labels
-        df = df.merge(
-            self.mastery_labels[['student_id', 'subject', 'topic', 'final_mastery_score']], 
-            on=['student_id', 'subject', 'topic'], 
-            how='left'
-        )
+        if 'final_mastery_score' not in df.columns:
+            df = df.merge(
+                self.mastery_labels[['student_id', 'subject', 'topic', 'final_mastery_score']], 
+                on=['student_id', 'subject', 'topic'], 
+                how='left'
+            )
         
         # Feature engineering
         features = df.copy()
         
         # Encode categorical variables
-        categorical_cols = ['subject', 'topic', 'difficulty_level', 'grade', 
-                          'section', 'preferred_learning_style', 'learning_pace']
+        categorical_cols = ['subject', 'topic', 'difficulty_level', 'learning_pace', 'preferred_learning_style']
         
         for col in categorical_cols:
             if col in features.columns:
@@ -73,11 +70,16 @@ class AMEPDataProcessor:
         feature_columns = [
             'quiz_score', 'time_taken_seconds', 'number_of_attempts',
             'previous_mastery_score', 'baseline_proficiency',
-            'subject_encoded', 'topic_encoded', 'difficulty_level_encoded',
-            'grade', 'learning_pace_encoded', 'preferred_learning_style_encoded'
+            'grade', 'subject_encoded', 'topic_encoded', 'difficulty_level_encoded',
+            'learning_pace_encoded', 'preferred_learning_style_encoded'
         ]
         
-        # Remove rows with missing target
+        # Final columns check
+        available_cols = [c for c in feature_columns if c in features.columns]
+        X = features[available_cols].fillna(0)
+        y = features['final_mastery_score'].fillna(70) # Default
+        
+        return X, y, available_cols
         features = features.dropna(subset=['final_mastery_score'])
         
         X = features[feature_columns].fillna(0)
@@ -121,11 +123,12 @@ class AMEPDataProcessor:
         feature_columns = [
             'tasks_completed', 'peer_review_score', 'communication_score',
             'collaboration_score', 'creativity_score', 'project_completion_pct',
-            'baseline_proficiency', 'role_in_team_encoded', 'grade',
+            'role_in_team_encoded', 'grade',
             'learning_pace_encoded', 'preferred_learning_style_encoded'
         ]
         
-        X = df[feature_columns].fillna(0)
+        available_cols = [c for c in feature_columns if c in df.columns]
+        X = df[available_cols].fillna(0)
         y = df['engagement_index']
         
         print(f"Features shape: {X.shape}")
@@ -178,14 +181,15 @@ class AMEPDataProcessor:
                 df[f'{col}_encoded'] = self.label_encoders[col].transform(df[col].astype(str))
         
         feature_columns = [
-            'baseline_proficiency', 'avg_mastery_score', 'grade',
+            'avg_mastery_score', 'grade',
             'learning_pace_encoded', 'preferred_learning_style_encoded'
         ]
         
         if 'avg_peer_score' in df.columns:
             feature_columns.extend(['avg_peer_score', 'total_tasks'])
         
-        X = df[feature_columns].fillna(0)
+        available_cols = [c for c in feature_columns if c in df.columns]
+        X = df[available_cols].fillna(0)
         y = df['recommended_difficulty']
         
         print(f"Features shape: {X.shape}")
