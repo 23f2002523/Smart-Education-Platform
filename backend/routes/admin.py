@@ -43,8 +43,7 @@ def dashboard(current_user):
             tuple(student_ids),
             fetch_one=True
         )
-        
-        # Active students (with recent activity)
+    
         active_students = execute_query(
             f"""SELECT COUNT(DISTINCT student_id) as count
                FROM engagement_logs
