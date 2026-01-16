@@ -200,22 +200,30 @@ def dashboard(current_user):
 @teacher_bp.route("/classes", methods=["GET"])
 @token_required
 def get_classes(current_user):
-    """Get teacher's classes"""
+    """Get teacher's classes with performance metrics"""
     try:
-        # Get unique grade/section combinations
-        classes = execute_query(
-            """SELECT DISTINCT grade, section, COUNT(*) as student_count
-               FROM students
-               GROUP BY grade, section
-               ORDER BY grade, section"""
-        )
+        # Get classes with student count and average mastery
+        query = """
+            SELECT 
+                s.grade, 
+                s.section, 
+                COUNT(DISTINCT s.student_id) as student_count,
+                ROUND(AVG(m.final_mastery_score), 1) as avg_mastery
+            FROM students s
+            LEFT JOIN mastery_scores m ON s.student_id = m.student_id
+            GROUP BY s.grade, s.section
+            ORDER BY s.grade, s.section
+        """
+        
+        classes = execute_query(query)
         
         return jsonify({
             "classes": [
                 {
                     "grade": c['grade'],
                     "section": c['section'],
-                    "student_count": c['student_count']
+                    "student_count": c['student_count'],
+                    "avg_mastery": c['avg_mastery'] if c['avg_mastery'] is not None else 0
                 } for c in classes
             ]
         }), 200
